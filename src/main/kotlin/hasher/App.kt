@@ -3,13 +3,36 @@
  */
 package hasher
 
-class App {
-    val greeting: String
-        get() {
-            return "Hello world."
+import picocli.CommandLine
+import picocli.CommandLine.Command
+import java.io.File
+import java.util.concurrent.Callable
+import kotlin.system.exitProcess
+
+@Command(name = "hasher", mixinStandardHelpOptions = true,
+        description = ["Stores hashes of given files to check for changes"],
+        subcommands = [Hash::class, Check::class])
+class Hasher : Callable<Int> {
+    override fun call(): Int {
+        val userHome = System.getProperty("user.home")
+        val settingsFile = File("$userHome/.hasher.json")
+        return if (settingsFile.exists()) {
+            System.err.println("Please specify a subcommand")
+            1
+        } else {
+            startUp(settingsFile)
+
         }
+    }
+
+    private fun startUp(settingsFile: File): Int {
+        if (!settingsFile.createNewFile()) {
+            System.err.println("Could not create file")
+            return 1
+        }
+        settingsFile.writeText("asdfsadf")
+        return 0
+    }
 }
 
-fun main(args: Array<String>) {
-    println(App().greeting)
-}
+fun main(args: Array<String>): Unit = exitProcess(CommandLine(Hasher()).execute(*args))
