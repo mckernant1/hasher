@@ -33,11 +33,13 @@ class Hash : Runnable {
     private var includeWhitespace = false
 
     override fun run() {
+        setup()
         if (!file.exists()) {
             System.err.println("The file does not exist")
             exitProcess(1)
         } else {
             val results = handleFileOrDir(file)
+            println(results)
             writeResultToSettings(results.toMutableMap())
         }
     }
@@ -85,30 +87,28 @@ class Hash : Runnable {
             text += f.lastModified().toString()
         }
         if (!includeWhitespace) {
-            text = text.replace("\\s+", "")
+            text = text.replace("\\s+".toRegex(), "")
         }
-
-        return messageDigest.digest(text.toByteArray()).toString()
+        println(f)
+        println(text)
+        return MessageDigest.getInstance(algorithm)
+                .digest(text.toByteArray()).toString()
     }
 
     companion object {
-        val settingsResource: String? = System.getProperty("HASHER_CONF")
+        val settingsResource: String? = System.getenv("HASHER_CONF")
         val json = Json(JsonConfiguration.Stable)
-        lateinit var messageDigest: MessageDigest
         lateinit var settingsFile: File
     }
-    init {
+    fun setup() {
         if (settingsResource == null) {
             System.err.println("Please run hasher with no arguments to setup your environment")
             exitProcess(1)
         }
         println("Running from $settingsResource config file")
         settingsFile = File(settingsResource)
-    }
-
-    init {
         try {
-            messageDigest = MessageDigest.getInstance(algorithm)
+            MessageDigest.getInstance(algorithm)
         } catch (e: NoSuchAlgorithmException) {
             System.err.println("This algorithm is invalid")
             exitProcess(1)

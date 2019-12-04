@@ -13,10 +13,11 @@ import kotlin.system.exitProcess
 
 @Command(name = "hasher", mixinStandardHelpOptions = true,
         description = ["Stores hashes of given files to check for changes"],
-        subcommands = [Hash::class, Check::class])
+        subcommands = [Hash::class, Check::class, ListHashes::class])
 class Hasher : Callable<Int> {
     override fun call(): Int {
-        val settingsResource: String? = System.getProperty("HASHER_CONF")
+        val settingsResource: String? = System.getenv("HASHER_CONF")
+        println(settingsResource)
         return if (settingsResource != null) {
             CommandLine.usage(this, System.out)
             1
@@ -56,7 +57,7 @@ class Hasher : Callable<Int> {
 
         println("\n\nLast step! Please add the environment variable to your shell\n")
         println("If using sudo only mode, be sure your environment variables and bashrc are sudo access only ")
-        println("echo 'export HASHER_CONF=\"${path}\"' >> .bashrc")
+        println("echo 'export HASHER_CONF=\"${path}\"' >> ~/.bashrc")
 
         return 0
     }
