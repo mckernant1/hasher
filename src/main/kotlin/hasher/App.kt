@@ -3,6 +3,8 @@
  */
 package hasher
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import java.io.File
@@ -14,24 +16,61 @@ import kotlin.system.exitProcess
         subcommands = [Hash::class, Check::class])
 class Hasher : Callable<Int> {
     override fun call(): Int {
-        val userHome = System.getProperty("user.home")
-        val settingsFile = File("$userHome/.hasher.json")
-        return if (settingsFile.exists()) {
-            System.err.println("Please specify a subcommand")
+        val settingsResource: String? = System.getProperty("HASHER_CONF")
+        return if (settingsResource != null) {
+            CommandLine.usage(this, System.out)
             1
         } else {
-            startUp(settingsFile)
-
+            startUp()
         }
     }
 
-    private fun startUp(settingsFile: File): Int {
-        if (!settingsFile.createNewFile()) {
-            System.err.println("Could not create file")
-            return 1
+    private fun startUp(): Int {
+        println("Welcome to Hasher...")
+
+        println("Your environment variable HASHER_CONF does not exist")
+        val defaultPath = "${System.getProperty("user.home")}/.hasher.json"
+        print("Please specify your config path or use the default ($defaultPath): ")
+        var path = readLine()
+        path = if (path.isNullOrBlank()) defaultPath else path
+        val settingsFile = File(path)
+        if (!settingsFile.exists()) {
+            if (!settingsFile.createNewFile()) {
+                System.err.println("Could not create file")
+                return 1
+            }
         }
-        settingsFile.writeText("asdfsadf")
+        println("\n\nSudo only mode means only the superuser can change and verify hashes")
+
+        print("Would you like to use sudo only mode (y/N): ")
+        val sudoMode = readLine()?.toLowerCase()?.contains("y") ?: false
+        if (sudoMode) {
+            println("\nYou will be prompted for your password to complete sudo setup")
+            sudoExec(listOf("sudo", "-S", "chown", "root", settingsFile.absolutePath))
+            sudoExec(listOf("sudo", "-S", "chmod", "600", settingsFile.absolutePath))
+        }
+        val json = Json(JsonConfiguration.Stable)
+        settingsFile.writeText(
+                json.stringify(SettingsFile.serializer(),
+                        SettingsFile(mutableMapOf())))
+
+        println("\n\nLast step! Please add the environment variable to your shell\n")
+        println("If using sudo only mode, be sure your environment variables and bashrc are sudo access only ")
+        println("echo 'export HASHER_CONF=\"${path}\"' >> .bashrc")
+
         return 0
+    }
+
+    private fun sudoExec(argsList: List<String>) {
+        val code = ProcessBuilder(argsList)
+                .redirectErrorStream(true)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectInput(ProcessBuilder.Redirect.INHERIT)
+                .start().waitFor()
+        if (code != 0) {
+            System.err.println("Something went wrong with ${argsList[0]}")
+            exitProcess(code)
+        }
     }
 }
 
