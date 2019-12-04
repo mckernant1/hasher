@@ -39,7 +39,6 @@ class Hash : Runnable {
             exitProcess(1)
         } else {
             val results = handleFileOrDir(file)
-            println(results)
             writeResultToSettings(results.toMutableMap())
         }
     }
@@ -89,10 +88,9 @@ class Hash : Runnable {
         if (!includeWhitespace) {
             text = text.replace("\\s+".toRegex(), "")
         }
-        println(f)
-        println(text)
         return MessageDigest.getInstance(algorithm)
-                .digest(text.toByteArray()).toString()
+                .digest(text.toByteArray())
+                .fold("") { str, it -> str + "%02x".format(it) }
     }
 
     companion object {

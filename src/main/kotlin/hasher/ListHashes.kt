@@ -11,27 +11,30 @@ import kotlin.system.exitProcess
 class ListHashes : Runnable {
 
     @Parameters(description = ["The name of the hash to retrieve"])
-    private var names: List<String> = listOf()
+    private var names: MutableList<String> = mutableListOf()
 
     override fun run() {
         setup()
-        val settingsJson = json.parse(SettingsFile.serializer(), Hash.settingsFile.readText())
+        val settingsJson = json.parse(SettingsFile.serializer(), settingsFile.readText())
 
         names.forEach { name ->
-            println(settingsJson.hashes[name]?.files ?: "There is no hash with this name")
-            println()
+            println(
+                    settingsJson.hashes[name]?.files?.map { (key, value) ->
+                        "$key : $value"
+                    }?.joinToString("\n") ?: "There is no hash with this name"
+            )
         }
 
     }
 
 
     companion object {
-        val settingsResource: String? = System.getProperty("HASHER_CONF")
+        val settingsResource: String? = System.getenv("HASHER_CONF")
         val json = Json(JsonConfiguration.Stable)
         lateinit var settingsFile: File
     }
 
-    fun setup() {
+    private fun setup() {
         if (settingsResource == null) {
             System.err.println("Please run hasher with no arguments to setup your environment")
             exitProcess(1)

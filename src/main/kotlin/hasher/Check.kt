@@ -53,10 +53,9 @@ class Check : Runnable {
         if (!options.includeWhitespace) {
             text = text.replace("\\s+".toRegex(), "")
         }
-        println("$text")
         val digest = MessageDigest.getInstance(options.algorithm)
-                .digest(text.toByteArray()).toString()
-        println("here: $digest $hash")
+                .digest(text.toByteArray())
+                .fold("") { str, it -> str + "%02x".format(it) }
         if (digest == hash) {
             return "Good!"
         }
