@@ -41,37 +41,16 @@ class Hasher : Callable<Int> {
                 return 1
             }
         }
-        println("\n\nSudo only mode means only the superuser can change and verify hashes")
-
-        print("Would you like to use sudo only mode (y/N): ")
-        val sudoMode = readLine()?.toLowerCase()?.contains("y") ?: false
-        if (sudoMode) {
-            println("\nYou will be prompted for your password to complete sudo setup")
-            sudoExec(listOf("sudo", "-S", "chown", "root", settingsFile.absolutePath))
-            sudoExec(listOf("sudo", "-S", "chmod", "600", settingsFile.absolutePath))
-        }
         val json = Json(JsonConfiguration.Stable)
         settingsFile.writeText(
                 json.stringify(SettingsFile.serializer(),
                         SettingsFile(mutableMapOf())))
 
         println("\n\nLast step! Please add the environment variable to your shell\n")
-        println("If using sudo only mode, be sure your environment variables and bashrc are sudo access only ")
-        println("echo 'export HASHER_CONF=\"${path}\"' >> ~/.bashrc")
-
+        println("echo 'export HASHER_CONF=\"${path}\"' >> ~/.bashrc\n")
+        println("echo 'export HASHER_CONF=\"${path}\"' >> ~/.zshrc\n")
+        println("echo 'export HASHER_CONF=\"${path}\"' >> ~/.kshrc\n")
         return 0
-    }
-
-    private fun sudoExec(argsList: List<String>) {
-        val code = ProcessBuilder(argsList)
-                .redirectErrorStream(true)
-                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                .redirectInput(ProcessBuilder.Redirect.INHERIT)
-                .start().waitFor()
-        if (code != 0) {
-            System.err.println("Something went wrong with ${argsList[0]}")
-            exitProcess(code)
-        }
     }
 }
 
