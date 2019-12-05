@@ -71,9 +71,10 @@ class Hash : Runnable {
                 if (currFile.isFile) {
                     jobList[currFile.absolutePath] = async { handleFile(currFile) }
                 } else if (currFile.isDirectory) {
-                    fileQueue.push(currFile)
+                    fileQueue.addAll(currFile.listFiles()!!)
                 }
             }
+            println("Hashing...")
             return@runBlocking jobList.map { (key, value) ->
                 key to value.await()
             }.toMap()
@@ -98,12 +99,13 @@ class Hash : Runnable {
         val json = Json(JsonConfiguration.Stable)
         lateinit var settingsFile: File
     }
-    fun setup() {
+
+    private fun setup() {
         if (settingsResource == null) {
             System.err.println("Please run hasher with no arguments to setup your environment")
             exitProcess(1)
         }
-        println("Running from $settingsResource config file")
+        println("Running from $settingsResource config file\n")
         settingsFile = File(settingsResource)
         try {
             MessageDigest.getInstance(algorithm)

@@ -5,8 +5,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import picocli.CommandLine.Command
-import picocli.CommandLine.Parameters
+import picocli.CommandLine.*
 import java.io.File
 import java.security.MessageDigest
 import kotlin.system.exitProcess
@@ -16,8 +15,10 @@ import kotlin.system.exitProcess
 class Check : Runnable {
 
     @Parameters(index = "0", description = ["Name of the hash which to check"])
-    lateinit var name: String
+    private lateinit var name: String
 
+    @Option(names = ["-a", "--all"], description = ["Show all files"])
+    private var showAllFiles = false
 
     override fun run() {
         setup()
@@ -34,7 +35,10 @@ class Check : Runnable {
             }
 
             jobList.forEach { (path, resString) ->
-                println("File: $path; Status: ${resString.await()}")
+                val res = resString.await()
+                if (showAllFiles || res != "Good!") {
+                    println("File: $path; Status: $res")
+                }
             }
         }
     }
@@ -74,7 +78,7 @@ class Check : Runnable {
             System.err.println("Please run hasher with no arguments to setup your environment")
             exitProcess(1)
         }
-        println("Running from ${Hash.settingsResource} config file")
+        println("Running from ${Hash.settingsResource} config file\n")
         settingsFile = File(settingsResource)
     }
 }

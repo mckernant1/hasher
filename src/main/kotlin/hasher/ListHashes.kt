@@ -2,7 +2,8 @@ package hasher
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import picocli.CommandLine.*
+import picocli.CommandLine.Command
+import picocli.CommandLine.Parameters
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -24,7 +25,11 @@ class ListHashes : Runnable {
                     }?.joinToString("\n") ?: "There is no hash with this name"
             )
         }
-
+        if (names.isEmpty()) {
+            println("Hashes:\n" +
+                    settingsJson.hashes.keys.joinToString("\n")
+            )
+        }
     }
 
 
@@ -39,7 +44,7 @@ class ListHashes : Runnable {
             System.err.println("Please run hasher with no arguments to setup your environment")
             exitProcess(1)
         }
-        println("Running from $settingsResource config file")
+        println("Running from $settingsResource config file\n")
         settingsFile = File(settingsResource)
     }
 }
