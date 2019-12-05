@@ -17,17 +17,17 @@ hasher hash myhash ~/Desktop/test.txt
 
 To list all hashes
 ```bash
-hash ls 
+hasher ls 
 ```
 
 To list all files for a hash
 ```bash
-hash ls myhash
+hasher ls myhash
 ```
 
 To check a hash
 ```bash
-hash check myhash
+hasher check myhash
 ```
 
 ### Settings JSON Structure
