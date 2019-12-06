@@ -1,3 +1,12 @@
+/*******************************************************************************
+/
+/      filename:  Hash.kt
+/
+/       description:  The hash subcommand
+/
+/       author:  McKernan, Thomas A.
+/       Copyright (c) 2019 Thomas McKernan , University of Dayton
+/****************************************************************************/*/
 package hasher
 
 import kotlinx.coroutines.Deferred
@@ -23,13 +32,14 @@ class Hash : Runnable {
     private lateinit var file: File
 
     @Option(names = ["-a", "--algorithm"],
-            description = ["The algorithm to use in the hash. Supports all MessageDigest instances"])
+            description = ["The algorithm to use in the hash. Supports all MessageDigest instances"],
+            defaultValue = "MD5")
     private var algorithm = "MD5"
 
-    @Option(names = ["-t", "--timestamp"], description = ["Include the timestamp in the hash"])
+    @Option(names = ["-t", "--timestamp"], description = ["Include the timestamp in the hash"], defaultValue = "false")
     private var includeTimestamp = false
 
-    @Option(names = ["-w", "--whitespace"], description = ["Include whitespace in the hash"])
+    @Option(names = ["-w", "--whitespace"], description = ["Include whitespace in the hash"], defaultValue = "false")
     private var includeWhitespace = false
 
     override fun run() {
@@ -43,6 +53,10 @@ class Hash : Runnable {
         }
     }
 
+    /**
+     * writes to the json settings file
+     * @param pathHashPairs The hash map pairs to insert into the json
+     */
     private fun writeResultToSettings(pathHashPairs: MutableMap<String, String>) {
         val settingsJson = json.parse(SettingsFile.serializer(), settingsFile.readText())
         val currOptions = Options(includeWhitespace, includeTimestamp, algorithm)
@@ -61,11 +75,18 @@ class Hash : Runnable {
         settingsFile.writeText(json.stringify(SettingsFile.serializer(), settingsJson))
     }
 
+    /**
+     * Handles a file or directory. Recurses through directories
+     * @param f File to search
+     * @return The map of paths to hashes
+     */
     private fun handleFileOrDir(f: File): Map<String, String> {
         return runBlocking {
             val fileQueue = LinkedList<File>()
             fileQueue.push(f)
+
             val jobList = mutableMapOf<String, Deferred<String>>()
+
             while (fileQueue.isNotEmpty()) {
                 val currFile = fileQueue.pop()
                 if (currFile.isFile) {
@@ -74,6 +95,7 @@ class Hash : Runnable {
                     fileQueue.addAll(currFile.listFiles()!!)
                 }
             }
+
             println("Hashing...")
             return@runBlocking jobList.map { (key, value) ->
                 key to value.await()
@@ -81,6 +103,11 @@ class Hash : Runnable {
         }
     }
 
+    /**
+     * Handles an inidividual file and creates the hash
+     * @param f The file to hash
+     * @return the hash
+     */
     private fun handleFile(f: File): String {
         var text = f.readText()
         if (includeTimestamp) {

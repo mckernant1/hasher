@@ -1,3 +1,12 @@
+/*******************************************************************************
+/
+/      filename:  SettingsFile.kt
+/
+/       description:  The Settings file nested objects
+/
+/       author:  McKernan, Thomas A.
+/       Copyright (c) 2019 Thomas McKernan , University of Dayton
+/****************************************************************************/*/
 package hasher
 
 import kotlinx.serialization.Serializable

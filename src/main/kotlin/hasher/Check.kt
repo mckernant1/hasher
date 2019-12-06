@@ -1,3 +1,12 @@
+/*******************************************************************************
+/
+/      filename:  Check.kt
+/
+/       description:  The check subcommand
+/
+/       author:  McKernan, Thomas A.
+/       Copyright (c) 2019 Thomas McKernan , University of Dayton
+/****************************************************************************/*/
 package hasher
 
 import kotlinx.coroutines.Deferred
@@ -11,15 +20,18 @@ import java.security.MessageDigest
 import kotlin.system.exitProcess
 
 @Command(name = "check", mixinStandardHelpOptions = true,
-        description = ["Checks hashes of existing files against stored hashes"])
+        description = ["Checks hashes of existing files against stored hashes. Shows mismatched files"])
 class Check : Runnable {
 
-    @Parameters(index = "0", description = ["Name of the hash which to check"])
+    @Parameters(index = "0", description = ["Name of the hash to check"])
     private lateinit var name: String
 
-    @Option(names = ["-a", "--all"], description = ["Show all files"])
+    @Option(names = ["-a", "--all"], description = ["Show all files checked"], defaultValue = "false")
     private var showAllFiles = false
 
+    /**
+     * Checks all files in the given hash namespace
+     */
     override fun run() {
         setup()
         val settingsJson = json.parse(SettingsFile.serializer(), settingsFile.readText())
@@ -43,6 +55,13 @@ class Check : Runnable {
         }
     }
 
+    /**
+     * Checks an individual file against its hash
+     * @param path The path of the file to check
+     * @param hash The previous hash of the file
+     * @param options The given options for the hash namespace
+     * @return The appropriate string for each case
+     */
     private fun checkHash(path: String, hash: String, options: Options): String {
         val f = File(path)
         if (!f.exists()) {

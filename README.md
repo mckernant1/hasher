@@ -1,8 +1,20 @@
 # Hasher
 Command line hasher for linux file verification
+written in Kotlin using picoCLI
+
+## To run in project
+```bash
+./gradlew run
+```
+
+## To build jar
+Jar path is `build/libs/hasher-all.jar`
+```bash
+./gradlew shadowJar
+```
 
 
-##To install
+##To install production
 ```bash
 brew tap mckernant1/tools
 brew install hasher

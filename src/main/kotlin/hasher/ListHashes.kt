@@ -1,3 +1,12 @@
+/*******************************************************************************
+/
+/      filename:  ListHashes.kt
+/
+/       description:  The ls subcommand
+/
+/       author:  McKernan, Thomas A.
+/       Copyright (c) 2019 Thomas McKernan , University of Dayton
+/****************************************************************************/*/
 package hasher
 
 import kotlinx.serialization.json.Json
@@ -14,6 +23,10 @@ class ListHashes : Runnable {
     @Parameters(description = ["The name of the hash to retrieve"])
     private var names: MutableList<String> = mutableListOf()
 
+    /**
+     * If no args prints a list of hash namespaces
+     * If args prints all files for given namespaces
+     */
     override fun run() {
         setup()
         val settingsJson = json.parse(SettingsFile.serializer(), settingsFile.readText())
