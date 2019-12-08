@@ -14,7 +14,7 @@ Jar path is `build/libs/hasher-all.jar`
 ```
 
 
-##To install production
+## To install via brew 
 ```bash
 brew tap mckernant1/tools
 brew install hasher
