@@ -5,7 +5,7 @@
 /       description:  The ls subcommand
 /
 /       author:  McKernan, Thomas A.
-/       Copyright (c) 2019 Thomas McKernan , University of Dayton
+/       Copyright (c) 2019 Thomas A. McKernan , University of Dayton
 /****************************************************************************/*/
 package hasher
 
